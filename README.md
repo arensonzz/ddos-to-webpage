@@ -10,14 +10,25 @@ All changes are saved to a PostgreSQL database.
 
 ## Running application locally
 
-1. Install Docker images defined in the compose file.
+1. Initialize docker compose with the script.
     ```sh
-    sudo docker compose pull
+    bash initialize_compose.sh
     ```
 
-1. Run compose services.
+1. Run the application.
     ```sh
-    sudo docker compose up -d
+    sudo docker compose run -d
+    ```
+
+1. You can monitor outputs of containers with:
+
+    All containers:
+    ```sh
+    sudo docker compose logs -f
+    ```
+    One container:
+    ```sh
+    sudo docker compose logs <container-name> -f
     ```
 
 1. You can access the application:
