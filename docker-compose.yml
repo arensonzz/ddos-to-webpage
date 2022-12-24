@@ -1,15 +1,8 @@
-version: "3.8"
+version: "2.4"
 
 services:
   app:
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 500M
-        reservations:
-          cpus: '0.5'
-          memory: 250M
+    cpus: 1
     image: "arensonz/todo-api"
     ports:
       - 5122:5122
@@ -22,6 +15,7 @@ services:
     restart: on-failure
 
   postgres:
+    cpus: 1
     image: postgres:14.4
     ports:
       - 5432:5432
@@ -36,14 +30,10 @@ services:
 
   server-1:
     image: httpd
-    deploy:
-      resources:
-        limits:
-          cpus: '0.01'
-          memory: 20M
-        reservations:
-          cpus: '0.01'
-          memory: 10M
+    cpus: 0.5
+    mem_limit: 50m
+    memswap_limit: 100m
+    mem_reservation: 25m
     volumes:
       - "./server.conf:/usr/local/apache2/conf/httpd.conf"
       - "todo_client_1:/var/www/todo-app"
@@ -59,14 +49,8 @@ services:
 
   server-2:
     image: httpd
-    deploy:
-      resources:
-        limits:
-          cpus: '0.01'
-          memory: 20M
-        reservations:
-          cpus: '0.01'
-          memory: 10M
+    cpus: 0.5
+    cpuset: "1"
     volumes:
       - "./server.conf:/usr/local/apache2/conf/httpd.conf"
       - "todo_client_2:/var/www/todo-app"
@@ -81,15 +65,8 @@ services:
         httpd-foreground
 
   proxy-nginx:
+    cpus: 2
     image: nginx
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 500M
-        reservations:
-          cpus: '0.5'
-          memory: 250M
     ports:
       - 80:80
     volumes:
