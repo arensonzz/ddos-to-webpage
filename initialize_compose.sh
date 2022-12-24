@@ -6,6 +6,6 @@
 sudo docker compose down --volumes
 sudo docker compose up -d
 for (( i = 1; i <= 10; i++ )); do
-    sudo docker compose cp ../todo_client/. "server-nginx-$i:/var/www/todo-app"
+    sudo docker compose cp ./TodoClient/. "server-nginx-$i:/var/www/todo-app"
 done
 sudo docker compose down
