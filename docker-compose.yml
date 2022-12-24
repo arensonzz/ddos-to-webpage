@@ -34,8 +34,8 @@ services:
       POSTGRES_DB: postgres
     restart: on-failure
 
-  server-nginx-1:
-    image: nginx
+  server-1:
+    image: httpd
     deploy:
       resources:
         limits:
@@ -45,7 +45,7 @@ services:
           cpus: '0.01'
           memory: 10M
     volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
+      - "./server.conf:/etc/apache2/sites-available/000-default.conf"
       - "todo_client_1:/var/www/todo-app"
     working_dir: "/"
     expose: 
@@ -55,166 +55,6 @@ services:
       - -c
       - |
         sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 01<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-2:
-    image: nginx
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 150M
-        reservations:
-          cpus: '0.5'
-          memory: 75M
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_2:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 02<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-3:
-    image: nginx
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 150M
-        reservations:
-          cpus: '0.5'
-          memory: 75M
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_3:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 03<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-4:
-    image: nginx
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 150M
-        reservations:
-          cpus: '0.5'
-          memory: 75M
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_4:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 04<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-5:
-    image: nginx
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_5:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 05<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-6:
-    image: nginx
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_6:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 06<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-7:
-    image: nginx
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_7:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 07<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-8:
-    image: nginx
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_8:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 08<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-9:
-    image: nginx
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_9:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 09<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
-
-  server-nginx-10:
-    image: nginx
-    volumes:
-      - "./server-nginx.conf:/etc/nginx/nginx.conf"
-      - "todo_client_10:/var/www/todo-app"
-    working_dir: "/"
-    expose: 
-      - "80"
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 10<\/h1>/' /var/www/todo-app/index.html
-        nginx -g "daemon off;"
 
   proxy-nginx:
     image: nginx
@@ -229,19 +69,10 @@ services:
     ports:
       - 80:80
     volumes:
-      - "./proxy-nginx.conf:/etc/nginx/nginx.conf"
+      - "./proxy-nginx.conf:/etc/apache2/sites-available/000-default.conf"
     working_dir: "/"
     depends_on:
-      - "server-nginx-1"
-      - "server-nginx-2"
-      - "server-nginx-3"
-      - "server-nginx-4"
-      - "server-nginx-5"
-      - "server-nginx-6"
-      - "server-nginx-7"
-      - "server-nginx-8"
-      - "server-nginx-9"
-      - "server-nginx-10"
+      - "server-1"
     restart: on-failure
 
 volumes:
