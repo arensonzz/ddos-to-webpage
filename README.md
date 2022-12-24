@@ -75,7 +75,7 @@ Use Docker Compose file version 2 to set resources of each service in non-swarm 
 ignored by docker-compose*.
 
 * **Note:** Nginx reverse proxy caches and buffers responses from upstream servers by default. This can prevent upstream
-server DDoS attacks because each request does n
+server DDoS attacks because not every request reach the upstream server.
 
 ## DDoS Instructions
 

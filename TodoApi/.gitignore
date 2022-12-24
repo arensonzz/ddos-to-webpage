@@ -1,0 +1,6 @@
+bin/
+obj/
+published/
+Properties/
+docker-compose.yml
+*.old
