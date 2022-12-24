@@ -47,3 +47,9 @@ All changes are saved to a PostgreSQL database.
         # Enter the password when prompted
         # Password: 0000
         ```
+
+## DDoS Instructions
+
+*Note:* You cannot always see the load balancing action by looking at the server number in the webpage header. Because
+there are total of 3 files (index.html, index.js, styles.css) in the client and each of them cause GET request. You can
+only see the server number which serves the GET request of index.html file.

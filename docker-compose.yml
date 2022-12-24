@@ -5,11 +5,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.1'
-          memory: 150M
+          cpus: '1'
+          memory: 500M
         reservations:
-          cpus: '0.05'
-          memory: 75M
+          cpus: '0.5'
+          memory: 250M
     image: "arensonz/todo-api"
     ports:
       - 5122:5122
@@ -17,6 +17,9 @@ services:
     environment:
       ASPNETCORE_URLS: "http://0.0.0.0:5122"
       NPGSQL_CONN: "Host=postgres;Username=postgres;Password=0000;Database=postgres;Port=5432"
+    depends_on:
+      - "postgres"
+    restart: on-failure
 
   postgres:
     image: postgres:14.4
@@ -24,14 +27,23 @@ services:
       - 5432:5432
     working_dir: "/"
     volumes:
-      - "./TodoApi/Databases:/docker-entrypoint-initdb.d"
+      - "./Databases:/docker-entrypoint-initdb.d"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: '0000'
       POSTGRES_DB: postgres
+    restart: on-failure
 
   server-nginx-1:
     image: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.01'
+          memory: 20M
+        reservations:
+          cpus: '0.01'
+          memory: 10M
     volumes:
       - "./server-nginx.conf:/etc/nginx/nginx.conf"
       - "todo_client_1:/var/www/todo-app"
@@ -47,6 +59,14 @@ services:
 
   server-nginx-2:
     image: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 150M
+        reservations:
+          cpus: '0.5'
+          memory: 75M
     volumes:
       - "./server-nginx.conf:/etc/nginx/nginx.conf"
       - "todo_client_2:/var/www/todo-app"
@@ -62,6 +82,14 @@ services:
 
   server-nginx-3:
     image: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 150M
+        reservations:
+          cpus: '0.5'
+          memory: 75M
     volumes:
       - "./server-nginx.conf:/etc/nginx/nginx.conf"
       - "todo_client_3:/var/www/todo-app"
@@ -77,6 +105,14 @@ services:
 
   server-nginx-4:
     image: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 150M
+        reservations:
+          cpus: '0.5'
+          memory: 75M
     volumes:
       - "./server-nginx.conf:/etc/nginx/nginx.conf"
       - "todo_client_4:/var/www/todo-app"
@@ -182,11 +218,31 @@ services:
 
   proxy-nginx:
     image: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 500M
+        reservations:
+          cpus: '0.5'
+          memory: 250M
     ports:
       - 80:80
     volumes:
       - "./proxy-nginx.conf:/etc/nginx/nginx.conf"
     working_dir: "/"
+    depends_on:
+      - "server-nginx-1"
+      - "server-nginx-2"
+      - "server-nginx-3"
+      - "server-nginx-4"
+      - "server-nginx-5"
+      - "server-nginx-6"
+      - "server-nginx-7"
+      - "server-nginx-8"
+      - "server-nginx-9"
+      - "server-nginx-10"
+    restart: on-failure
 
 volumes:
   todo_client_1:

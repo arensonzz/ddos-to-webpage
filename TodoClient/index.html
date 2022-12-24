@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Todo App</title>
+  <link rel="stylesheet" href="style.css" type="text/css" media="all">
+  <script defer src="index.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <header class="header">
+    <h1 class="header__name">Get Things Done!</h1>
+  </header>
+  <main>
+    <div class="todo-items" id="todoItems">
+      <section class="todo-item todo-items__new-item">
+        <h1>New Item</h1>
+        <div class="todo-item__input-container">
+          <textarea name="name" cols="20"></textarea>
+          <button type="button" name="add" class="button" id="addTodoItem">Add</button>
+        </div>
+      </section>
+      <section class="todo-items__remaining">
+        <h1>Remaining</h1>
+      </section>
+      <section class="todo-items__done">
+        <h1>Done</h1>
+      </section>
+    </div>
+  </main>
+
+</body>
+
+
+</html>
