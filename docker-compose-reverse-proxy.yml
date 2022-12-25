@@ -1,0 +1,11 @@
+version: "2.4"
+
+services:
+  proxy-nginx:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - "./proxy-nginx.conf:/etc/nginx/nginx.conf"
+    working_dir: "/"
+    restart: on-failure

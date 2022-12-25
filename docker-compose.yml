@@ -40,6 +40,8 @@ services:
     working_dir: "/"
     expose: 
       - "80"
+    ports:
+      - 80:8080
     command: 
       - /bin/sh
       - -c
@@ -55,6 +57,8 @@ services:
       - "./server.conf:/usr/local/apache2/conf/httpd.conf"
       - "todo_client_2:/var/www/todo-app"
     working_dir: "/"
+    ports:
+      - 80:8081
     expose: 
       - "80"
     command: 
@@ -72,6 +76,8 @@ services:
       - "./server.conf:/usr/local/apache2/conf/httpd.conf"
       - "todo_client_3:/var/www/todo-app"
     working_dir: "/"
+    ports:
+      - 80:8082
     expose: 
       - "80"
     command: 
@@ -89,6 +95,8 @@ services:
       - "./server.conf:/usr/local/apache2/conf/httpd.conf"
       - "todo_client_4:/var/www/todo-app"
     working_dir: "/"
+    ports:
+      - 80:8083
     expose: 
       - "80"
     command: 
@@ -97,22 +105,6 @@ services:
       - |
         sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 04<\/h1>/' /var/www/todo-app/index.html
         httpd-foreground
-
-  proxy-nginx:
-    image: nginx
-    cpu_count: 4
-    cpu_percent: 100
-    ports:
-      - 80:80
-    volumes:
-      - "./proxy-nginx.conf:/etc/nginx/nginx.conf"
-    working_dir: "/"
-    depends_on:
-      - "server-1"
-      - "server-2"
-      - "server-3"
-      - "server-4"
-    restart: on-failure
 
 volumes:
   todo_client_1:
