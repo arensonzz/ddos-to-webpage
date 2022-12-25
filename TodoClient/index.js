@@ -1,4 +1,4 @@
-const todoApiUrl = "http://localhost:5122/api/TodoItems";
+const todoApiUrl = "http://10.42.0.109:5122/api/TodoItems";
 const remainingItemsSection = document.querySelector(".todo-items__remaining");
 const doneItemsSection = document.querySelector(".todo-items__done");
 const addTodoItem = document.querySelector(".todo-item__input-container > button");

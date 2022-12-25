@@ -2,8 +2,9 @@ version: "2.4"
 
 services:
   app:
-    cpus: 1
-    image: "arensonz/todo-api"
+    cpu_count: 1
+    cpu_percent: 50
+    image: "todo-api"
     ports:
       - 5122:5122
     working_dir: "/app"
@@ -15,7 +16,8 @@ services:
     restart: on-failure
 
   postgres:
-    cpus: 1
+    cpu_count: 1
+    cpu_percent: 50
     image: postgres:14.4
     ports:
       - 5432:5432
@@ -30,10 +32,8 @@ services:
 
   server-1:
     image: httpd
-    cpus: 0.5
-    mem_limit: 50m
-    memswap_limit: 100m
-    mem_reservation: 25m
+    cpu_count: 1
+    cpu_percent: 10
     volumes:
       - "./server.conf:/usr/local/apache2/conf/httpd.conf"
       - "todo_client_1:/var/www/todo-app"
@@ -49,8 +49,8 @@ services:
 
   server-2:
     image: httpd
-    cpus: 0.5
-    cpuset: "1"
+    cpu_count: 1
+    cpu_percent: 10
     volumes:
       - "./server.conf:/usr/local/apache2/conf/httpd.conf"
       - "todo_client_2:/var/www/todo-app"
@@ -64,9 +64,44 @@ services:
         sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 02<\/h1>/' /var/www/todo-app/index.html
         httpd-foreground
 
+  server-3:
+    image: httpd
+    cpu_count: 1
+    cpu_percent: 10
+    volumes:
+      - "./server.conf:/usr/local/apache2/conf/httpd.conf"
+      - "todo_client_3:/var/www/todo-app"
+    working_dir: "/"
+    expose: 
+      - "80"
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 03<\/h1>/' /var/www/todo-app/index.html
+        httpd-foreground
+
+  server-4:
+    image: httpd
+    cpu_count: 1
+    cpu_percent: 10
+    volumes:
+      - "./server.conf:/usr/local/apache2/conf/httpd.conf"
+      - "todo_client_4:/var/www/todo-app"
+    working_dir: "/"
+    expose: 
+      - "80"
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        sed -i 's/<h1 class="header__name">Get Things Done!<\/h1>/<h1 class="header__name">Get Things Done! - Server 04<\/h1>/' /var/www/todo-app/index.html
+        httpd-foreground
+
   proxy-nginx:
-    cpus: 2
     image: nginx
+    cpu_count: 4
+    cpu_percent: 100
     ports:
       - 80:80
     volumes:
@@ -75,6 +110,8 @@ services:
     depends_on:
       - "server-1"
       - "server-2"
+      - "server-3"
+      - "server-4"
     restart: on-failure
 
 volumes:

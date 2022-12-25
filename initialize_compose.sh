@@ -5,7 +5,7 @@
 # affecting others.
 sudo docker compose down --volumes
 sudo docker compose up -d
-for (( i = 1; i <= 2; i++ )); do
+for (( i = 1; i <= 4; i++ )); do
     sudo docker compose cp ./TodoClient/. "server-$i:/var/www/todo-app"
 done
 sudo docker compose down
