@@ -12,13 +12,14 @@ All services run as Docker containers. They are defined using the Docker Compose
 Services are listed below:
 * **app**: Basic CRUD web API written in .NET 6.0.
 * **postgres**: PostgreSQL database.
-* **server-1 to server-4**: Apache2 web servers serving static web pages.
+* **server-1 to server-4**: Apache2 (httpd) web servers serving static web pages.
 * **proxy-nginx**: Nginx reverse proxy server which redirects incoming requests to upstream web servers.
 
 ## Requirements
 
 * [Docker engine](https://docs.docker.com/engine/install/)
 * [Python Slowloris DDoS tool](https://github.com/gkbrk/slowloris)
+* [XerXes DoS tool](https://github.com/CyberXCodder/XerXes)
 * ApacheBench load testing tool
 
     ```sh
@@ -27,6 +28,12 @@ Services are listed below:
 * Web browser
 
 ## Running application locally
+
+1. Change URL of the API in `./TodoClient/index.js` according to your victim device.
+    
+    ```js
+    const todoApiUrl = "http://<victim_ip>:5122/api/TodoItems";
+    ```
 
 1. Initialize docker compose with the script.
 
@@ -74,8 +81,22 @@ Use Docker Compose file version 2 to set resources of each service in non-swarm 
 `deploy` in compose file version 3. `deploy` configuration only takes effect when using `docker stack deploy`, *and is
 ignored by docker-compose*.
 
-* **Note:** Nginx reverse proxy caches and buffers responses from upstream servers by default. This can prevent upstream
+* **Note:** Nginx reverse proxy caches responses from upstream servers by default. This can prevent upstream
 server DDoS attacks because not every request reach the upstream server.
+
+### `proxy-nginx.conf`
+
+* [Core functionality](https://nginx.org/en/docs/ngx_core_module.html)
+* [HTTP upstream module](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
+* [`worker_processes`](https://nginx.org/en/docs/ngx_core_module.html#worker_processes): Defines the number of worker processes.
+* [`worker_connections`](https://nginx.org/en/docs/ngx_core_module.html#worker_connections): Sets the maximum number of simultaneous connections that can be opened by a worker process.
+* [`proxy_cache`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache): Defines a shared memory zone used for caching.
+* [`limit_conn`](https://nginx.org/en/docs/http/ngx_http_limit_conn_module.html#limit_conn): Sets the shared memory zone and the maximum allowed number of connections for a given key value. When
+    this limit is exceeded, the server will return the error in reply to a request.
+* [`limit_req_zone`](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html#limit_req): Sets the shared memory zone and the maximum burst size of requests. If the requests rate exceeds the
+    rate configured for a zone, their processing is delayed such that requests are processed at a defined rate. Excessive
+    requests are delayed until their number exceeds the maximum burst size in which case the request is terminated with an
+    error.
 
 ## DDoS Instructions
 
@@ -91,8 +112,15 @@ cannot exhaust upstream servers by opening more connections. However you can exh
 
 ### Slowloris Attack
 
+Default Nginx configuration is vulnerable to Slowloris attack. Scarce resource is the maximum number of simultaneous
+    worker connections. This number can be calculated as `worker_connections * worker_processes` and equals to 512 in
+    default nginx configuration. So, it is quite easy to take down unprotected Nginx.
 
 * **Note:** You must change ulimit in Linux to open more sockets than the default soft limit of 1021.
+
+    ```sh
+    ulimit -n 65536
+    ```
     * [Maximum number of sockets get limited to 1021](https://github.com/gkbrk/slowloris/issues/17)
     * [Change ulimit in Linux](https://unix.stackexchange.com/a/31728)
 
@@ -100,12 +128,45 @@ cannot exhaust upstream servers by opening more connections. However you can exh
 * Start the Slowloris from attacker machine.
     
     ```sh
-    python slowloris.py -p 80 -s 1024 --sleeptime 1 10.42.0.1
+    python slowloris.py -p 80 -s 3000 --sleeptime 1 <victim_ip>
     ```
-* If `worker_connections` parameter of Nginx is lower than the Slowloris socket count, Nginx cannot
+
+* SlowLoris will flood a server with connections. In our example if SlowLoris sends 3000 connections per second, and
+    Nginx can only handle 2048 connections per second, Nginx cannot
     respond to legit requests so you cannot access the webpage. Load balancing between web servers does
     not solve the problem because reverse proxy is down.
 
+* Now change `proxy-nginx.conf` to mitigate the DDoS attack.
+    * Uncomment `limit_conn two 20;` to limit maximum allowed number of connections for a single IP.
+    * Uncomment `limit_req zone=one burst=500;` to limit allowed request rate per second.
+    * Uncomment `client_body_timeout 10s;`
+    * Uncomment `client_header_timeout 10s;`
+
+### XerXes Attack
+
+* You can change number of CONNECTIONS and THREADS to use in the attack by modifying `xerxes.c` source code.
+
+    ```c
+    #define CONNECTIONS 32
+    #define THREADS 48
+    ```
+
+* Start the XerXes from attacker machine.
+
+    ```sh
+    ./xerxes <victim_ip> 80
+    ```
+
+* Benchmark performance of Webpage using JMeter.
+* Now activate load balancing in the `proxy-nginx.conf`. Uncomment following lines:
+
+    ```
+    server server-2:80 weight=1;
+    server server-3:80 weight=1;
+    server server-4:80 weight=1;
+    ```
+
+* Benchmark performance of Webpage using JMeter again and compare the results.
 
 ## Useful Links
 
@@ -114,4 +175,5 @@ cannot exhaust upstream servers by opening more connections. However you can exh
 * [Nginx load balancing reference](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/)
 * [Nginx http_proxy reference](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering)
 * [DDoS Apache servers from a single machine](https://medium.com/@brannondorsey/d%CC%B6dos-apache-servers-from-a-single-machine-f23e91f5d28)
+* [Nginx DDoS attack prevention](https://inmediatum.com/en/blog/engineering/ddos-attacks-prevention-nginx/)
 
