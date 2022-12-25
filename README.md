@@ -9,10 +9,14 @@ TodoApi is a CRUD application in which you can add tasks and edit their content 
 All changes are saved to a PostgreSQL database.
 
 All services run as Docker containers. They are defined using the Docker Compose version 2 file format.
-Services are listed below:
+Services are seperated into two machines.
+
+First machine (server machine) runs the `docker-compose-server.yml` file.
 * **app**: Basic CRUD web API written in .NET 6.0.
 * **postgres**: PostgreSQL database.
 * **server-1 to server-4**: Apache2 (httpd) web servers serving static web pages.
+
+Second machine (reverse proxy machine) runs the `docker-compose-reverse-proxy.yml` file.
 * **proxy-nginx**: Nginx reverse proxy server which redirects incoming requests to upstream web servers.
 
 ## Requirements
@@ -29,57 +33,58 @@ Services are listed below:
 
 ## Running application locally
 
-1. Change URL of the API in `./TodoClient/index.js` according to your victim device.
-    
-    ```js
-    const todoApiUrl = "http://<victim_ip>:5122/api/TodoItems";
-    ```
+1. Server Machine
+    1. Change URL of the API in `./TodoClient/index.js` according to machine's IP.
+        ```js
+        const todoApiUrl = "http://<machine_ip>:5122/api/TodoItems";
+        ```
 
-1. Initialize docker compose with the script.
+    1. Copy docker compose file to root.
+        ```sh
+        cp ./docker/docker-compose-server.yml docker-compose.yml
+        ```
 
-    ```sh
-    bash initialize_compose.sh
-    ```
+    1. Initialize docker compose with the script.
+        ```sh
+        bash initialize_compose.sh
+        ```
 
-1. Run the application.
+    1. Run the application.
+        ```sh
+        sudo docker compose run -d
+        ```
 
-    ```sh
-    sudo docker compose run -d
-    ```
+1. Reverse Proxy Machine
+    1. Copy docker compose file to root.
+        ```sh
+        cp ./docker/docker-compose-reverse-proxy.yml docker-compose.yml
+        ```
 
-1. You can monitor outputs of containers with:
+    1. Run the application.
+        ```sh
+        sudo docker compose run -d
+        ```
 
-    All containers:
-
-    ```sh
-    sudo docker compose logs -f
-    ```
-
-    One container:
-
-    ```sh
-    sudo docker compose logs <container-name> -f
-    ```
 
 1. You can access the application:
 
-    * Go to `http://localhost` to view the webpage.
-    * Go to `http://localhost:5122/api/todoitems` to access the API.
+    * Go to `http://<reverse_proxy_machine_ip>` to view the webpage.
+    * Go to `http://<server_machine_ip>:5122/api/todoitems` to access the API.
+    * Go to following pages to access each server.
+        ```
+        http://<server_machine_ip>:8080
+        http://<server_machine_ip>:8081
+        http://<server_machine_ip>:8082
+        http://<server_machine_ip>:8083
+        ```
     * Use `psql` CLI utility if you want to access the database directly
-
         ```sh
-        psql -h localhost -p 5432 -U postgres -d postgres -W
+        psql -h <server_machine_ip> -p 5432 -U postgres -d postgres -W
         # Enter the password when prompted
         # Password: 0000
         ```
 
-## Server Configurations
-
-Use Docker Compose file version 2 to set resources of each service in non-swarm mode.
-
-* **Note:** cpu_shares, cpu_quota, cpuset, mem_limit, memswap_limit: These have been replaced by the `resources` key under
-`deploy` in compose file version 3. `deploy` configuration only takes effect when using `docker stack deploy`, *and is
-ignored by docker-compose*.
+## Reverse Proxy Configurations
 
 * **Note:** Nginx reverse proxy caches responses from upstream servers by default. This can prevent upstream
 server DDoS attacks because not every request reach the upstream server.
@@ -137,36 +142,52 @@ Default Nginx configuration is vulnerable to Slowloris attack. Scarce resource i
     not solve the problem because reverse proxy is down.
 
 * Now change `proxy-nginx.conf` to mitigate the DDoS attack.
-    * Uncomment `limit_conn two 20;` to limit maximum allowed number of connections for a single IP.
-    * Uncomment `limit_req zone=one burst=500;` to limit allowed request rate per second.
-    * Uncomment `client_body_timeout 10s;`
-    * Uncomment `client_header_timeout 10s;`
+    * Uncomment `limit_conn two 10;` to limit maximum allowed number of connections for a single IP.
+    * Uncomment `limit_req zone=one burst=100;` to limit allowed request rate per second.
+    * Uncomment `client_body_timeout 1s;`
+    * Uncomment `client_header_timeout 1s;`
+
+* You can also increase the `worker_connections` to be able to handle more connections.
 
 ### XerXes Attack
+
+* Start by only one server defined in the upstream section of `proxy-nginx.conf`.
+    ```
+    upstream server_cluster {
+        server <server_machine_ip>:8080 weight=1;
+        # server <server_machine_ip>:8081 weight=1;
+        # server <server_machine_ip>:8082 weight=1;
+        # server <server_machine_ip>:8083 weight=1;
+        keepalive 32;
+    }
+    ```
 
 * You can change number of CONNECTIONS and THREADS to use in the attack by modifying `xerxes.c` source code.
 
     ```c
     #define CONNECTIONS 32
-    #define THREADS 48
+    #define THREADS 96
     ```
 
 * Start the XerXes from attacker machine.
 
     ```sh
-    ./xerxes <victim_ip> 80
+    ./xerxes <server_machine_ip> 8080
     ```
 
-* Benchmark performance of Webpage using JMeter.
+* Benchmark performance of server using ApacheBench.
+    ```sh
+    ab -t 30 -c 10 http://<reverse_proxy_machine_ip>/
+    ```
+
 * Now activate load balancing in the `proxy-nginx.conf`. Uncomment following lines:
-
     ```
-    server server-2:80 weight=1;
-    server server-3:80 weight=1;
-    server server-4:80 weight=1;
+    server <server_machine_ip>:8080 weight=1;
+    server <server_machine_ip>:8081 weight=1;
+    server <server_machine_ip>:8082 weight=1;
     ```
 
-* Benchmark performance of Webpage using JMeter again and compare the results.
+* Benchmark performance of server using ApacheBench again and compare the results.
 
 ## Useful Links
 
