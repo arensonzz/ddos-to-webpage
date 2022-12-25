@@ -1,3 +1,4 @@
 .idea
 TodoApi.sln
 nginx
+/docker-compose.yml
