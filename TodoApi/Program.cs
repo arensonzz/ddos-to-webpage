@@ -11,10 +11,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("TodoItemsController",
         policy =>
         {
-            policy.                               
+            policy
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials()
                 .AllowAnyOrigin();
         });
 });

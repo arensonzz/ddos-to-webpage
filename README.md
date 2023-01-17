@@ -19,6 +19,7 @@ First machine (server machine) runs the `docker-compose-server.yml` file.
 Second machine (reverse proxy machine) runs the `docker-compose-reverse-proxy.yml` file.
 * **proxy-nginx**: Nginx reverse proxy server which redirects incoming requests to upstream web servers.
 
+
 ## Requirements
 
 * [Docker engine](https://docs.docker.com/engine/install/)
@@ -37,6 +38,11 @@ Second machine (reverse proxy machine) runs the `docker-compose-reverse-proxy.ym
     1. Change URL of the API in `./TodoClient/index.js` according to machine's IP.
         ```js
         const todoApiUrl = "http://<machine_ip>:5122/api/TodoItems";
+        ```
+
+    1. Compile TodoApi using Dockerfile.
+        ```sh
+        sudo docker build -t "todo-api" TodoApi
         ```
 
     1. Copy docker compose file to root.
@@ -189,6 +195,7 @@ Default Nginx configuration is vulnerable to Slowloris attack. Scarce resource i
 
 * Benchmark performance of server using ApacheBench again and compare the results.
 
+
 ## Useful Links
 
 * [Docker Compose file version 2 reference](https://docs.docker.com/compose/compose-file/compose-file-v2/#cpu-and-other-resources)
@@ -198,3 +205,9 @@ Default Nginx configuration is vulnerable to Slowloris attack. Scarce resource i
 * [DDoS Apache servers from a single machine](https://medium.com/@brannondorsey/d%CC%B6dos-apache-servers-from-a-single-machine-f23e91f5d28)
 * [Nginx DDoS attack prevention](https://inmediatum.com/en/blog/engineering/ddos-attacks-prevention-nginx/)
 
+## Contributors
+
+* [Erkan Vatan](https://github.com/arensonzz)
+* [Mehmet Yiğit](https://github.com/MehmetYigitt)
+* [Sami Çelik](https://github.com/SamiCelik)
+* [Ozan Kukul](https://github.com/ozankukul)

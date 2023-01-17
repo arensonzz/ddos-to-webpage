@@ -8,7 +8,7 @@ namespace TodoApi.Models
         public long? Id { get; set; }
         [BindProperty]
         public string Name { get; set; }
-       [BindProperty] 
+        [BindProperty] 
         public bool IsComplete { get; set; }
 
         public TodoItem(object[] fields)
